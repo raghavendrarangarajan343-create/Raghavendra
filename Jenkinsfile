@@ -2,8 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Expose Python and pip Scripts to the PATH for Jenkins service
-        PATH = "C:\\Users\\RAGHAVENDRA R\\AppData\\Local\\Programs\\Python\\Python314;C:\\Users\\RAGHAVENDRA R\\AppData\\Local\\Programs\\Python\\Python314\\Scripts;${env.PATH}"
+        // Point Jenkins to the correct Python 3.13 installation (avoids Python 3.14 build-tool issues)
+        PATH = "C:\\Users\\RAGHAVENDRA R\\AppData\\Local\\Programs\\Python\\Python313;C:\\Users\\RAGHAVENDRA R\\AppData\\Local\\Programs\\Python\\Python313\\Scripts;${env.PATH}"
+        // Placeholder API keys — tests run in mock mode when real keys are absent
+        OPENAI_API_KEY   = "your_openai_api_key_here"
+        SUPABASE_URL     = "https://taytjixivurgretofvne.supabase.co"
+        SUPABASE_KEY     = "sb_publishable_IM6mhchloDp9-vaCaSS8bw_OLd_Wera"
     }
 
     stages {
@@ -11,12 +15,16 @@ pipeline {
             steps {
                 echo 'Checking local system environment...'
                 bat 'python --version'
-                
-                withCredentials([file(credentialsId: 'ENV', variable: 'ENV_FILE')]) {
-                    echo 'Copying environment variables to project root...'
-                    bat 'copy /Y "%ENV_FILE%" project_root\\.env'
-                }
-                
+
+                echo 'Writing .env file for project_root...'
+                bat '''
+                    (
+                        echo OPENAI_API_KEY=%OPENAI_API_KEY%
+                        echo SUPABASE_URL=%SUPABASE_URL%
+                        echo SUPABASE_KEY=%SUPABASE_KEY%
+                    ) > project_root\\.env
+                '''
+
                 echo 'Setting up virtual environment and dependencies...'
                 dir('project_root') {
                     bat 'python -m venv venv'
