@@ -1,0 +1,47 @@
+[
+    {
+        "column_name": "Company Name",
+        "category": "Company Basics",
+        "data_type": "VARCHAR(255)",
+        "format_constraints": "Standard Case; UTF-8 Support",
+        "regex_pattern": "^[\\w\\s&.,\\-\\(\\)'\\u00C0-\\u017F]+$",
+        "nullability": "Not Null",
+        "is_derived": false
+    },
+    {
+        "column_name": "Category",
+        "category": "Company Basics",
+        "data_type": "VARCHAR(50)",
+        "format_constraints": "Pre-defined Enums",
+        "regex_pattern": "^(Startup|MSME|SMB|Enterprise|Investor|VC|Conglomerate)$",
+        "nullability": "Not Null",
+        "is_derived": false
+    },
+    {
+        "column_name": "Annual Revenues",
+        "category": "Financials",
+        "data_type": "DECIMAL",
+        "format_constraints": "Currency string or BigInt",
+        "regex_pattern": "^\\$?(?:\\d{1,3}(?:,\\d{3})+)",
+        "nullability": "Nullable",
+        "is_derived": false
+    },
+    {
+        "column_name": "Employee Size",
+        "category": "People & Talent",
+        "data_type": "VARCHAR(50)",
+        "format_constraints": "Buckets (e.g. 11-50) or Exact Integer",
+        "regex_pattern": "^(\\d+|\\d+-\\d+)$",
+        "nullability": "Not Null",
+        "is_derived": false
+    },
+    {
+        "column_name": "Remote Work Policy",
+        "category": "People & Talent",
+        "data_type": "VARCHAR(100)",
+        "format_constraints": "Enum: Remote-First; Hybrid; On-Site",
+        "regex_pattern": "^(Remote|Hybrid|On-Site|Office-First).*$",
+        "nullability": "Not Null",
+        "is_derived": false
+    }
+]

@@ -1,0 +1,109 @@
+Test ID,Description,Input Data,Expected Result,Category
+TC_12.1_01,Validate correct classification for Startup-stage company,Startup,✅ Accepted. Matches regex ^(Startup|MSME|SMB|Enterprise|Investor|VC|Conglomerate)$ and aligns with business rule (taxonomy mapping).,category
+TC_12.1_02,Validate classification for MSME based on small-scale company,MSME,"✅ Accepted. Valid enum and passes ""Value In List check"" (Automated validation).",category
+TC_12.1_03,Validate classification for SMB (mid-sized company),SMB,✅ Accepted. Matches allowed enum list and satisfies classification taxonomy rule.,category
+TC_12.1_04,Validate classification for Venture Capital firm,VC,✅ Accepted. Correct classification for investor-type entity per business rules.,category
+TC_12.1_05,Validate classification for Investor entity,Investor,✅ Accepted. Matches enum and aligns with business taxonomy.,category
+TC_12.1_06,Reject invalid classification outside enum,SmallBiz,"❌ Rejected. Fails regex and ""Value In List check"".",category
+TC_12.1_07,Reject incorrect casing if strict enum enforcement applied,startup,❌ Rejected if case-sensitive. Should normalize or enforce exact enum match.,category
+TC_12.1_08,Validate SMB classification consistency with employee size,50-200 + Category=SMB,✅ Accepted. Range aligns with SMB classification. Passes regex ^(\d+|\d+-\d+)$ and logical consistency.,employee_size
+TC_12.1_09,Detect mismatch: Large employee size but classified as Startup,1000 + Category=Startup,❌ Rejected. Violates business inference rule (Startup typically small scale).,employee_size
+TC_12.1_10,Validate VC classification aligns with company nature,Private + Category=VC,⚠️ Conditional: Accepted if entity is a VC firm structured as private. Requires cross-field validation.,nature_of_company
+TC_12.1_11,Detect mismatch: Non-Profit classified as VC,Non-Profit + Category=VC,❌ Rejected. Violates logical classification consistency.,nature_of_company
+TC_12.1_12,Validate Enterprise classification,Enterprise,✅ Accepted. Matches enum and taxonomy rule-12.1 test case,category
+TC_14.4_001,"Validate that inappropriate default values are NOT assigned to critical or measurable fields (e.g., financials, metrics, counts)","{ ""Annual Revenues"": ""$0"", ""Employee Size"": ""0"", ""Website Traffic Rank"": ""0"" }","❌ Fail – As per business_rules, measurable fields must not default to misleading values like 0 unless explicitly valid. Validation should flag incorrect defaults.",all_fields
+TC_14.4_002,"Validate that nullable descriptive or categorical fields can use safe defaults like ""Unknown"" where allowed","{ ""Remote Work Policy"": ""Unknown"", ""Vision"": null }","✅ Pass – Nullable fields with no strict business_rules can default to ""Unknown"" or remain null per nullability rules.",all_fields
+TC_14.4_003,"Validate that NOT NULL fields never receive default placeholders like ""N/A"", ""Unknown"", or empty strings","{ ""Company Name"": ""Unknown"", ""Category"": ""N/A"" }","❌ Fail – Violates Not Null + business_rules requiring valid, real values (e.g., official registry match, enum constraint).",all_fields
+TC_14.4_004,Validate that default values do not violate format_constraints or regex patterns,"{ ""Website URL"": ""Unknown"", ""CEO LinkedIn URL"": ""N/A"" }",❌ Fail – Invalid format; does not match required regex (HTTPS URL patterns).,all_fields
+TC_14.4_005,Validate context-aware defaulting: derived or calculated fields must NOT be defaulted arbitrarily,"{ ""CAC:LTV Ratio"": ""0"", ""Runway"": ""0"" }",❌ Fail – Derived metrics must be computed or null; defaulting to 0 violates data_rules and business logic.,all_fields
+TC_14.4_006,Validate that optional list/text fields can remain null instead of forced defaults,"{ ""Awards & Recognitions"": ""N/A"", ""Case Studies"": ""None"" }",❌ Fail – Should be null instead of forced placeholders per nullability rules.,all_fields
+TC_14.4_007,Validate that enum-based fields do not accept invalid default placeholders,"{ ""Nature of Company"": ""Unknown"", ""Profitability Status"": ""N/A"" }",❌ Fail – Must match strict enum values defined in regex_pattern.,all_fields
+TC_14.4_008,Validate that numeric fields respect domain constraints even when defaulted,"{ ""Employee Turnover"": ""150%"", ""Market Share (%)"": ""-10%"" }",❌ Fail – Violates range constraints (0–100%) defined in business_rules.,all_fields
+TC_14.4_009,Validate that valid contextual defaults are applied only where business-safe,"{ ""Decision Maker Accessibility"": ""Low - Not publicly reachable"" }",✅ Pass – Matches allowed enum prefix + descriptive extension per regex and business_rules.,all_fields
+TC_14.4_010,Validate that system avoids over-defaulting and preserves data integrity by leaving unknowns null,"{ ""Glassdoor Rating"": null, ""Indeed Rating"": null }","✅ Pass – Nullable fields should remain null instead of forced defaults, preserving data accuracy---12.2 test case",all_fields
+TC-12.3-01,Valid Classification: Verify Private companies are correctly identified.,SpaceX → Private,Pass: Matches enum `(Private,nature_of_company
+TC-12.3-02,Valid Classification: Verify Public companies are correctly identified.,Apple → Public,Pass: Valid classification; aligns with legal filings.,nature_of_company
+TC-12.3-03,Valid Classification: Verify Subsidiary companies are correctly identified.,WhatsApp → Subsidiary,Pass: Correct parent-child ownership classification.,nature_of_company
+TC-12.3-04,Invalid Classification: Reject values outside predefined enums.,Startup,Fail: Not in allowed enum list.,nature_of_company
+TC-12.3-05,Case Sensitivity Check: Ensure standardized enum format is enforced.,private,Fail: Should match exact enum (or normalized).,nature_of_company
+TC-12.3-06,Null Handling: Ensure field does not accept null values.,NULL,Fail: Field is Not Null (business rule violation).,nature_of_company
+TC-12.3-07,Special Character Validation: Reject invalid characters in classification.,Private@123,Fail: Violates regex constraint.,nature_of_company
+TC-12.3-08,Multi-value Rejection: Ensure only single classification is allowed.,Private/Public,Fail: Violates granularity (One per Entity).,nature_of_company
+TC-12.3-09,Whitespace Handling: Ensure trimming of leading/trailing spaces.,""" Public ""","Pass: Trimmed → ""Public""; matches enum.",nature_of_company
+TC-12.3-10,Boundary Enum Validation: Validate acceptance of all allowed enum values.,Govt,Pass: Valid enum value accepted.,nature_of_company
+TC-12.3-11,Cross-field Consistency: Ensure Category aligns with Nature of Company.,"Category=Startup, Nature=Public",Fail: Logical inconsistency (Startup typically Private).,category
+TC-12.3-12,Cross-field Validation: Accept valid Category & Nature combinations.,"Category=Enterprise, Nature=Public",Pass: Valid mapping.,category
+TC-12.3-13,Entity Validation: Ensure classification aligns with external trusted data sources.,Tesla → Public,Pass: Matches SEC/registry data.,global_record
+TC-12.3-14,Classification Completeness: Ensure every entity has a valid Nature of Company.,Missing field,Fail: Mandatory field missing---12.3 test case,global_record
+TC-12.4-01,Valid Sentiment Classification: Accept standard sentiment categories.,Positive,Pass: Matches allowed values `(Positive,brand_sentiment_score
+TC-12.4-02,Valid Numeric Sentiment Score: Accept numeric sentiment index.,85,Pass: Valid numeric score (0–100 scale),brand_sentiment_score
+TC-12.4-03,Invalid Sentiment Value: Reject unsupported labels.,Very Good,Fail: Not in allowed enum or numeric format,brand_sentiment_score
+TC-12.4-04,Null Handling: Ensure optional field allows null.,NULL,Pass: Field is Nullable,brand_sentiment_score
+TC-12.4-05,Positive Sentiment Mapping: High rating should map to Positive sentiment.,4.5,Pass: Interpreted as Positive (range 4.0–5.0),glassdoor_rating
+TC-12.4-06,Neutral Sentiment Mapping: Mid rating classification.,3,Pass: Interpreted as Neutral,glassdoor_rating
+TC-12.4-07,Negative Sentiment Mapping: Low rating classification.,1.8,Pass: Interpreted as Negative,glassdoor_rating
+TC-12.4-08,Range Validation: Reject out-of-bound rating.,5.5,Fail: Must be between 1.0 and 5.0,glassdoor_rating
+TC-12.4-09,Cross-platform Consistency: Validate rating follows same sentiment logic.,4.2,Pass: Interpreted as Positive,indeed_rating
+TC-12.4-10,Customer Sentiment Classification via rating.,2.5,Pass: Interpreted as Negative/Neutral boundary,google_reviews_rating
+TC-12.4-11,Positive Sentiment Mapping using NPS.,70,Pass: Promoter-heavy → Positive sentiment,net_promoter_score_nps
+TC-12.4-12,Neutral Sentiment Mapping using NPS.,10,Pass: Neutral sentiment,net_promoter_score_nps
+TC-12.4-13,Negative Sentiment Mapping using NPS.,-40,Pass: Detractor-heavy → Negative sentiment,net_promoter_score_nps
+TC-12.4-14,Range Validation for NPS.,150,Fail: Must be between -100 and 100,net_promoter_score_nps
+TC-12.4-15,Text Sentiment Extraction: Detect sentiment from descriptive text.,"""Collaborative and supportive environment""",Pass: Classified as Positive sentiment,work_culture
+TC-12.4-16,Negative Sentiment Detection from text.,"""Micromanagement and high pressure""",Pass: Classified as Negative sentiment,manager_quality
+TC-12.4-17,Enum-based Sentiment Classification.,High,Pass: Interpreted as Positive,psychological_safety
+TC-12.4-18,Invalid Enum Value Handling.,Very High,Fail: Not in allowed enum `(Low,psychological_safety
+TC-12.4-19,Cross-field Sentiment Consistency: Ensure ratings and sentiment do not contradict.,"Glassdoor=4.5, Brand Sentiment=Negative",Fail: Logical inconsistency,global_record
+TC-12.4-20,Aggregated Sentiment Validation: Ensure overall sentiment aligns with underlying metrics.,"Ratings high, NPS high, Sentiment=Positive",Pass: Consistent sentiment classification,global_record
+TC-12.5-01,Valid Risk Classification: Detect high customer dependency risk.,Yes – Top client contributes 35% revenue,Pass: Classified as High Risk (business rule: >20% concentration),customer_concentration_risk
+TC-12.5-02,Valid Risk Classification: Low concentration risk.,No – Top client contributes 10%,Pass: Classified as Low Risk,customer_concentration_risk
+TC-12.5-03,Invalid Input Handling: Reject unsupported values.,Maybe,Fail: Must match `(Yes,customer_concentration_risk
+TC-12.5-04,High Risk Detection: Identify geopolitical threats.,"""Operations impacted by trade sanctions in China""",Pass: Classified as High Risk (keyword: sanctions),geopolitical_risks
+TC-12.5-05,Medium Risk Detection: Moderate exposure scenario.,"""Dependent on imports from multiple regions""",Pass: Classified as Medium Risk,geopolitical_risks
+TC-12.5-06,Low Risk Detection: Minimal geopolitical exposure.,"""Domestic-only operations""",Pass: Classified as Low Risk,geopolitical_risks
+TC-12.5-07,Null Handling: Allow empty if no known risks.,NULL,Pass: Field is Nullable,geopolitical_risks
+TC-12.5-08,High Risk Assessment: Excessive burn rate detection.,$5M/month with low revenue,Pass: Classified as High Risk,burn_rate
+TC-12.5-10,Invalid Value Handling: Reject negative burn.,-$500K,Fail: Burn rate must be > 0,burn_rate
+TC-12.5-11,Critical Risk Detection: Low runway threshold.,4 months,Pass: Classified as High Risk (rule: <6 months critical),runway
+TC-12.5-12,Safe Range Validation: Adequate runway.,18 months,Pass: Classified as Low Risk,runway
+TC-12.5-13,Invalid Input Handling: Reject negative runway.,-3 months,Fail: Must be positive numeric,runway
+TC-12.5-14,Risk Identification: Detect macroeconomic risks.,"""High inflation and rising interest rates""",Pass: Classified as High Risk,macro_risks
+TC-12.5-15,Neutral Risk Scenario.,"""Stable economic conditions""",Pass: Classified as Low/Medium Risk,macro_risks
+TC-12.5-16,High Risk Detection: Missing certifications or breach history.,"""No SOC2; recent data breach""",Pass: Classified as High Risk,cybersecurity_posture
+TC-12.5-17,Low Risk Detection: Strong security posture.,"""SOC2, ISO27001 certified""",Pass: Classified as Low Risk,cybersecurity_posture
+TC-12.5-18,Text Validation: Detect risk keywords.,"""Minor vulnerabilities identified""",Pass: Classified as Medium Risk,cybersecurity_posture
+TC-12.5-19,Cross-field Risk Consistency: Ensure burn + runway alignment.,"Burn=$5M/month, Runway=3 months",Pass: Overall classified as High Risk,global_record
+TC-12.5-20,Contradiction Detection: Prevent inconsistent risk signals.,"Burn=$5M, Runway=24 months, Risk=Low",Fail: Inconsistent risk classification,global_record
+TC-12.5-21,Aggregated Risk Validation: Ensure overall risk reflects multiple factors.,"High burn, low runway, high geo risk",Pass: Final classification = High Risk,global_record
+TC-13.2-01,Response Time Measurement: Measure total generation time for a Fortune 500 company with full metadata (all fields populated).,"Complete dataset (e.g., Apple-like entity with 150+ fields populated)","Pass: Response time ≤ defined SLA (e.g., ≤ 2 sec). System handles large, complex records efficiently.",global_record
+TC-13.2-02,Response Time Measurement: Measure generation time for a startup entity with minimal data.,Partial dataset (10–20 fields populated),Pass: Faster response than enterprise case; ≤ 1 sec expected.,global_record
+TC-13.2-03,Comparative Performance: Compare response time between Public vs Private companies.,Public: Full dataset; Private: Medium dataset,Pass: Public company processing time ≥ Private; difference within acceptable threshold (<30%).,global_record
+TC-13.2-04,Scalability Test: Measure response time as number of fields increases.,Dataset sizes: 20 fields → 80 fields → 150+ fields,Pass: Response time increases linearly; no exponential degradation.,global_record
+TC-13.2-05,High Load Scenario: Measure response time under concurrent requests.,50 parallel company records (mixed types),Pass: Avg response time within SLA; no timeout or crash.,global_record
+TC-13.2-06,Data Complexity Impact: Evaluate response time for high-text vs numeric-heavy datasets.,"Text-heavy (Narratives, Risks) vs Numeric-heavy (Financials)",Pass: Text processing slightly slower but within SLA limits.,global_record
+TC-13.2-07,Edge Case Performance: Measure response time for maximum allowed input size.,"Max length fields (e.g., 5000-char descriptions across multiple fields)",Pass: System processes without latency spike or memory failure.,global_record
+TC-13.2-08,Timeout Handling: Ensure system fails gracefully if response exceeds limit.,Artificial delay > SLA threshold,Fail/Pass: System returns timeout error or fallback response.,global_record
+TC-13.2-09,Caching Efficiency: Measure repeated query response time.,Same company queried multiple times,Pass: Subsequent responses faster due to caching.,global_record
+TC-13.2-10,End-to-End Pipeline Time: Validate total processing time (ingestion → validation → output).,Full pipeline execution,Pass: Total time within SLA; no stage bottlenecks.,global_record
+TC-13.3-01,Token Limit Handling: Validate that long company descriptions are not truncated mid-sentence,Overview of the Company = 5000-character narrative text,Pass: No mid-sentence cutoff; content ends with complete sentence; complies with max length constraint (≤5000),global_record
+TC-13.3-02,Token Limit Handling: Validate handling of records with multiple long text fields simultaneously,"Overview, Services / Offerings / Products, Recent News all near max length",Pass: All fields fully preserved; no truncation or data loss across fields,global_record
+TC-13.3-03,Token Limit Handling: Validate large list fields are not partially truncated,Office Locations = 100+ entries (comma-separated or structured text),Pass: All entries retained; no broken or incomplete location values,global_record
+TC-13.3-04,Token Limit Handling: Ensure no mid-word truncation occurs at token boundary,Long narrative text near token limit,Pass: Output ends at full word boundary; no partial words present,global_record
+TC-13.3-05,Token Limit Handling: Validate structured data integrity under high token load,Key Business Leaders = large JSON array with multiple entries,Pass: JSON remains valid; no missing brackets or structural corruption,global_record
+TC-13.3-06,Token Limit Handling: Validate system behavior with maximum allowed cumulative payload size,Full dataset (150+ fields populated; multiple max-length TEXT fields),Pass: Entire record processed without truncation; respects individual field constraints and validation_mode,global_record
+TC-13.3-07,Token Limit Handling: Validate that smaller fields are not dropped when one field is very large,Overview = max length; other fields = normal size,Pass: All fields populated; no starvation or omission of smaller fields,global_record
+TC-13.3-08,Token Limit Handling: Validate encoding preservation in long text fields,"Long text with UTF-8 characters (é, ü, ñ)",Pass: Characters preserved; no encoding corruption; complies with regex where applicable,global_record
+TC-13.3-09,Token Limit Handling: Validate behavior when input slightly exceeds allowed limits,Overview = 6000 characters,Pass: Data truncated gracefully to 5000 OR rejected per validation rules; no system crash,global_record
+TC-13.3-10,Token Limit Handling: Validate end-to-end pipeline does not truncate data across stages,Full pipeline: ingestion → validation → output with large record,Pass: No truncation across pipeline; output matches input within defined constraints,global_record
+TC-14.4-11,"Mixed Data Type Load: Validate token handling across text, numeric, and URL fields",Large text + multiple URLs + numeric metrics,Pass: No truncation across any data type; all formats preserved,global_record
+TC-14.4-12,Pipeline Integrity: Validate full record survives ingestion → validation → output without truncation,Full dataset (150+ fields populated),Pass: No data loss across pipeline stages; aligns with validation_mode (Automated/Manual),global_record
+TC-13.4-01,Memory Independence: Validate no data leakage between sequential requests,"Request 1: Company A (e.g., fintech dataset)Request 2: Company B (e.g., healthcare dataset)","Pass: Response for Company B contains only B’s data; no fields, values, or context from Company A present",global_record
+TC-13.4-02,Memory Independence: Validate isolation when similar companies are processed sequentially,Request 1: Company A (SaaS CRM)Request 2: Company B (SaaS CRM competitor),"Pass: No attribute/value mixing (e.g., customers, products, metrics) between A and B",global_record
+TC-13.4-03,Memory Independence: Validate no cross-contamination in batch processing,Batch input: 10 companies with similar structure,Pass: Each output record strictly maps to its input; no shared or duplicated data across records,global_record
+TC-13.4-04,Memory Independence: Validate field-level isolation across requests,Company A has CEO Name = John DoeCompany B has CEO Name = Alice Smith,"Pass: Company B output must not contain ""John Doe""; strict field-level correctness maintained",global_record
+TC-13.4-05,Memory Independence: Validate isolation under high load (parallel processing),20 parallel requests with different company datasets,Pass: No cross-request contamination; all outputs correctly mapped to respective inputs,global_record
+TC-13.4-06,Memory Independence: Validate no residual memory from previous failed request,Request 1: Invalid/partial datasetRequest 2: Valid dataset,Pass: Request 2 output unaffected by Request 1 failure; no residual artifacts,global_record
+TC-13.4-07,Memory Independence: Validate no contamination across different data types,Company A: text-heavy datasetCompany B: numeric-heavy dataset,Pass: No mixing of textual/numeric values across records,global_record
+TC-13.4-08,Memory Independence: Validate repeated requests do not accumulate stale data,Same Company B requested multiple times with slight variations,Pass: Each response reflects only current input; no accumulation of prior values,global_record
+TC-13.4-09,Memory Independence: Validate isolation across derived and dependent fields,"Company A and B with different Annual Revenues, Profitability Status",Pass: Derived/logically linked fields remain correct per entity; no cross-entity influence,global_record
+TC-13.4-10,Memory Independence: End-to-end validation across pipeline stages,Sequential pipeline execution for multiple companies,"Pass: No contamination across ingestion, validation, and output stages",global_record
